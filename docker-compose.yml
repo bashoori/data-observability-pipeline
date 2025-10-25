@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  airflow:
+    image: apache/airflow:2.9.3
+    restart: always
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=SequentialExecutor
+      # مسیر جدید برای SQLite داخلی Airflow
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=sqlite:////opt/airflow/airflow.db
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - _AIRFLOW_WWW_USER_CREATE=True
+      - _AIRFLOW_WWW_USER_USERNAME=admin          # ✅ Username
+      - _AIRFLOW_WWW_USER_PASSWORD=admin          # ✅ Password
+    user: "0:0"   # اجرا با دسترسی root برای جلوگیری از Permission Error
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./data:/opt/airflow/data
+    ports:
+      - "8080:8080"
+    command: bash -c "airflow db init && airflow webserver & airflow scheduler"
